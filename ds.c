@@ -407,22 +407,17 @@ void clook(struct Queue *req_queue) {
     else {
       /* There is at least one arrived process,
        choose the one which has closes head */
-       printf("in else\n");
+      circle_time = 0;
       int old_head = current_head;
       if (findHeadMin(requests, number_of_requests, current_head) == -1){
-         current_head = requests[findArrivedMinHead(requests, number_of_requests)].disk_number;
-         printf("old: %d new: %d\n", old_head, current_head);
-         head_replacement += abs(old_head-current_head);
-         request_to_be_processed_index = current_head;
-         if (findHeadMin(requests, number_of_requests, current_head) == -1){
-           break;
-         }
+         int ind = findArrivedMinHead(requests, number_of_requests);
+         current_head = requests[ind].disk_number;
+         circle_time += abs(old_head-current_head);
+         request_to_be_processed_index = ind;
 
       }else{
         request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head);
       }
-
-
       req = requests[request_to_be_processed_index];
     }
 
@@ -437,13 +432,10 @@ void clook(struct Queue *req_queue) {
     head_replacement += abs(req.disk_number - current_head);
     current_head = req.disk_number;
 
-    total_time = total_time + head_replacement;
+    total_time = total_time + head_replacement + circle_time;
     total_wait_time += wait_time;
     wait_times[request_to_be_processed_index] = wait_time;
     updateArrivals( requests,  number_of_requests, total_time);
-
-    printf("current_head %d\n", current_head);
-    printf("total_time: %d \n", total_time);
     if (current_head == findArrivedMaxHead(requests, number_of_requests)) {
       current_head = findArrivedMinHead(requests, number_of_requests);
     }
