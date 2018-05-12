@@ -47,8 +47,43 @@ void readFile( struct Queue *req_queue, char input_file[]){
     req.arrival_time = in_arrival_time;
     req.disk_number = in_disk_no;
     req.processed = 0;
+    req.arrived = 0;
     enqueue(req_queue, req);
   }
 
   fclose(fp);
+}
+
+void swap(struct request* a, struct request* b)
+{
+    struct request temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int partition (struct request requests[], int start, int end)
+{
+    struct request pivot = requests[end];    // pivot
+    int smallElem = (start - 1);  // Index of smaller element
+
+    for (int i = start; i <= end- 1; i++)
+    {
+        if (requests[i].disk_number <= pivot.disk_number)
+        {
+            smallElem++;
+            swap(&requests[smallElem], &requests[i]);
+        }
+    }
+    swap(&requests[smallElem + 1], &requests[end]);
+    return (smallElem + 1);
+}
+
+void sort(struct request requests[], int start, int end) {
+    if (start < end)
+    {
+        int index = partition(requests, start, end);
+
+        sort(requests, start, index - 1);
+        sort(requests, index + 1, end);
+    }
 }

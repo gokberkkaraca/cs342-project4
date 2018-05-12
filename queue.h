@@ -5,6 +5,7 @@ struct request {
   int arrival_time;
   int disk_number;
   int processed;
+  int arrived;
 };
 
 struct Node {
