@@ -106,7 +106,6 @@ void sstf(struct Queue *req_queue){
 
     int min_index = findMin(total_time, current_head,
       requests, number_of_requests, N);
-
     struct request req = requests[min_index];
     if (req.arrival_time >= total_time) {
       total_time = req.arrival_time;
@@ -169,16 +168,15 @@ void look(struct Queue *req_queue) {
     else if (number_of_arrived == 0) {
       /* There is no request in the arrival queue, but processes are not
       finished, so continue to the first arrived one */
-
-      printf("time max: %d, time min: %d\n", findTimeMax(requests,number_of_requests), findTimeMin(requests,number_of_requests));
-      request_to_be_processed_index = (head_direction) ? findTimeMin(requests, number_of_requests) : findTimeMax(requests, number_of_requests);
+      request_to_be_processed_index = (head_direction) ? findTimeMin(requests,
+        number_of_requests) : findTimeMax(requests, number_of_requests);
       req = requests[request_to_be_processed_index];
     }
     else {
       /* There is at least one arrived process,
        choose the one which has closes head */
-       printf("head max: %d, head min: %d\n", findHeadMax(requests,number_of_requests), findHeadMin(requests,number_of_requests));
-      request_to_be_processed_index = (head_direction) ? findHeadMin(requests, number_of_requests) : findHeadMax(requests, number_of_requests);
+      request_to_be_processed_index = (head_direction) ? findHeadMin(requests,
+        number_of_requests) : findHeadMax(requests, number_of_requests);
       req = requests[request_to_be_processed_index];
     }
 
@@ -189,16 +187,17 @@ void look(struct Queue *req_queue) {
     else {
       wait_time = total_time - req.arrival_time;
     }
-    printf("index: %d\n",request_to_be_processed_index );
+
     head_replacement = abs(req.disk_number - current_head);
     current_head = req.disk_number;
+    requests[request_to_be_processed_index].processed = 1;
     total_time = total_time + head_replacement;
     total_wait_time += wait_time;
     wait_times[request_to_be_processed_index] = wait_time;
     number_of_processed++;
-    printf("before ar");
-    updateArrivals( requests, number_of_requests, total_time);
-printf("after ar");
+    printf("current head: %d\n", current_head );
+    updateArrivals( requests, total_time, number_of_requests);
+
     if (head_direction == 0 && request_to_be_processed_index == 0) {
       head_direction = 1;
     }else if (head_direction == 1
@@ -260,7 +259,7 @@ int findHeadMax( struct request requests[], int size){
   max_head_index = -1;
   for( index = 0; index < size; index++){
     if( requests[index].processed == 0 && requests[index].arrived == 1){
-      if(requests[index].disk_number > max_head){
+      if(requests[index].disk_number >= max_head){
         max_head = requests[index].disk_number;
         max_head_index = index;
       }
@@ -272,7 +271,7 @@ int findHeadMax( struct request requests[], int size){
 void updateArrivals(struct request requests[], int current_time, int size){
   int i;
   for (i = arrival_index; i < size; i++) {
-    if(requests[i].arrival_time < current_time){
+    if(requests[i].arrival_time <= current_time){
       requests[i].arrived = 1;
     }
   }
