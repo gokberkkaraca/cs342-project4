@@ -5,11 +5,30 @@ int findMin(int total_time, int current_head, struct request requests[], int siz
   int min_index = -1;
   int min_disp = N + 1;
   int index = 0;
-  for( index = 0; index < size; index++){
-    if( (abs(current_head - requests[index].disk_number) < min_disp) && requests[index].processed == 0 && requests[index].arrival_time <= total_time){
-      min_index = index;
-      min_disp = abs(current_head - requests[index].disk_number);
+  int arrived_flag = 0;
+
+  for (index = 0; index < size; index++) {
+    if( requests[index].processed == 0 && requests[index].arrival_time <= total_time){
+      arrived_flag = 1;
+      break;
     }
+  }
+
+  if(arrived_flag == 0){
+    for( index = 0; index < size; index++){
+      if(requests[index].processed == 0){
+            min_index = index;
+            min_disp = abs(current_head - requests[index].disk_number);
+            break;
+      }
+  }
+  }else{
+    for( index = 0; index < size; index++){
+      if( (abs(current_head - requests[index].disk_number) < min_disp) && requests[index].processed == 0 && requests[index].arrival_time <= total_time){
+            min_index = index;
+            min_disp = abs(current_head - requests[index].disk_number);
+    }
+  }
   }
   requests[min_index].processed = 1;
   return min_index;
