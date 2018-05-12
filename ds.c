@@ -39,9 +39,9 @@ int main(int argc, char **argv) {
 
   readFile(req_queue, input_file);
   look(req_queue);
-  //
-  // readFile(req_queue, input_file);
-  // clook(req_queue, N);
+
+  readFile(req_queue, input_file);
+  clook(req_queue);
 
   exit(0);
 }
@@ -171,11 +171,9 @@ void look(struct Queue *req_queue) {
     else if (findNumberArrivedAndUnprocessed(requests,number_of_requests, total_time) == 0) {
       /* There is no request in the arrival queue, but processes are not
       finished, so continue to the first arrived one */
-      request_to_be_processed_index = (head_direction) ? findTimeMin(requests,
-        number_of_requests) : findTimeMax(requests, number_of_requests);
+      request_to_be_processed_index = findTimeMin(requests,number_of_requests);
 
-      if (findTimeMin(requests,
-        number_of_requests) == -1 && findTimeMax(requests, number_of_requests) == -1) {
+      if (request_to_be_processed_index == -1){
         break;
       }
       req = requests[request_to_be_processed_index];
@@ -359,4 +357,105 @@ int findNumberArrivedAndUnprocessed(struct request requests[], int size, int cur
     }
   }
   return count;
+}
+
+void clook(struct Queue *req_queue) {
+
+  double total_wait_time = 0;
+  double avarage_wait_time;
+  double std_wait;
+  int wait_times[req_queue->size];
+
+
+  int total_time = 0;
+  int current_head = 1;
+
+  int number_of_requests = req_queue->size;
+  int number_of_processed = 0;
+
+  // Create an array of time-sorted requests
+  struct request requests[req_queue->size];
+  int i;
+  for (i = 0; i < number_of_requests; i++) {
+    requests[i] = dequeue(req_queue);
+  }
+
+  // Start processing requests
+  while (1) {
+
+    int wait_time;
+    int head_replacement = 0;
+    int circle_time = 0;
+
+
+    struct request req;
+    int request_to_be_processed_index = -2;
+    if (number_of_processed == number_of_requests) {
+      break;
+    }
+    else if (findNumberArrivedAndUnprocessed(requests,number_of_requests, total_time) == 0) {
+      /* There is no request in the arrival queue, but processes are not
+      finished, so continue to the first arrived one */
+      request_to_be_processed_index = findTimeMin(requests,number_of_requests);
+
+      if (request_to_be_processed_index == -1){
+        break;
+      }
+      req = requests[request_to_be_processed_index];
+
+    }
+    else {
+      /* There is at least one arrived process,
+       choose the one which has closes head */
+       printf("in else\n");
+      int old_head = current_head;
+      if (findHeadMin(requests, number_of_requests, current_head) == -1){
+         current_head = requests[findArrivedMinHead(requests, number_of_requests)].disk_number;
+         printf("old: %d new: %d\n", old_head, current_head);
+         head_replacement += abs(old_head-current_head);
+         request_to_be_processed_index = current_head;
+         if (findHeadMin(requests, number_of_requests, current_head) == -1){
+           break;
+         }
+
+      }else{
+        request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head);
+      }
+
+
+      req = requests[request_to_be_processed_index];
+    }
+
+    if (req.arrival_time >= total_time) {
+      total_time = req.arrival_time;
+      wait_time = 0;
+    }
+    else {
+      wait_time = total_time - req.arrival_time;
+    }
+
+    head_replacement += abs(req.disk_number - current_head);
+    current_head = req.disk_number;
+
+    total_time = total_time + head_replacement;
+    total_wait_time += wait_time;
+    wait_times[request_to_be_processed_index] = wait_time;
+    updateArrivals( requests,  number_of_requests, total_time);
+
+    printf("current_head %d\n", current_head);
+    printf("total_time: %d \n", total_time);
+    if (current_head == findArrivedMaxHead(requests, number_of_requests)) {
+      current_head = findArrivedMinHead(requests, number_of_requests);
+    }
+
+
+    requests[request_to_be_processed_index].processed = 1;
+    number_of_processed++;
+  }
+
+  avarage_wait_time = total_wait_time / number_of_requests;
+  std_wait = calculateSTD(avarage_wait_time, wait_times, number_of_requests);
+
+  printf("CLOOK:\t %d\t%f\t%f\n", total_time, avarage_wait_time, std_wait);
+
 }
