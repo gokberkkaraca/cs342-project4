@@ -9,7 +9,6 @@ void sstf(struct Queue *req_queue);
 void look(struct Queue *req_queue);
 void clook(struct Queue *req_queue);
 int findTimeMin( struct request requests[], int size);
-int findTimeMax( struct request requests[], int size);
 int findHeadMin( struct request requests[], int size, int current_head);
 int findHeadMax( struct request requests[], int size, int current_head);
 int findArrivedMaxHead( struct request requests[], int size);
@@ -157,27 +156,19 @@ void look(struct Queue *req_queue) {
   }
 
   // Start processing requests
-  while (1) {
+  while ( number_of_processed != number_of_requests) {
 
     int wait_time;
     int head_replacement;
 
-
     struct request req;
     int request_to_be_processed_index = -2;
-    if (number_of_processed == number_of_requests) {
-      break;
-    }
-    else if (findNumberArrivedAndUnprocessed(requests,number_of_requests, total_time) == 0) {
+    if (findNumberArrivedAndUnprocessed(requests,number_of_requests, total_time) == 0) {
       /* There is no request in the arrival queue, but processes are not
       finished, so continue to the first arrived one */
       request_to_be_processed_index = findTimeMin(requests,number_of_requests);
 
-      if (request_to_be_processed_index == -1){
-        break;
-      }
       req = requests[request_to_be_processed_index];
-
 
       if (req.disk_number < current_head) {
         head_direction = 0;
@@ -189,24 +180,15 @@ void look(struct Queue *req_queue) {
     else {
       /* There is at least one arrived process,
        choose the one which has closes head */
-
-       if (findHeadMin(requests, number_of_requests, current_head) == -1
-       && findHeadMax(requests, number_of_requests, current_head) == -1) {
-         break;
-       }
-
-        if( head_direction == 1){
-          request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head);
-          if(request_to_be_processed_index == -1){
-            head_direction = 0;
-          }
+          if( head_direction == 1){
+            request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head);
+            if(request_to_be_processed_index == -1){
+              head_direction = 0;
+            }
         }
 
         if( head_direction == 0){
           request_to_be_processed_index = findHeadMax(requests, number_of_requests, current_head);
-          if(request_to_be_processed_index == -1){
-            head_direction = 1;
-          }
         }
 
       req = requests[request_to_be_processed_index];
@@ -227,14 +209,6 @@ void look(struct Queue *req_queue) {
     total_wait_time += wait_time;
     wait_times[request_to_be_processed_index] = wait_time;
     updateArrivals( requests,  number_of_requests, total_time);
-
-    if (head_direction == 0 && current_head == findArrivedMinHead(requests, number_of_requests)) {
-      head_direction = 1;
-    }else if (head_direction == 1
-      && current_head == findArrivedMaxHead(requests, number_of_requests)) {
-      head_direction = 0;
-    }
-
     requests[request_to_be_processed_index].processed = 1;
     number_of_processed++;
   }
@@ -248,22 +222,13 @@ void look(struct Queue *req_queue) {
 int findTimeMin( struct request requests[], int size){
   int index;
   for( index = 0; index < size; index++){
-    if ( requests[index].processed == 0) {
+    if ( requests[index].processed == 0 && requests[index].arrived == 0) {
       return index;
     }
   }
   return -1;
 }
 
-int findTimeMax( struct request requests[], int size){
-  int index;
-  for( index = size-1; index >= 0; index--){
-    if( requests[index].processed == 0){
-      return index;
-    }
-  }
-  return -1;
-}
 
 int findHeadMin( struct request requests[], int size, int current_head){
   int index;
@@ -381,42 +346,24 @@ void clook(struct Queue *req_queue) {
   }
 
   // Start processing requests
-  while (1) {
+  while ( number_of_processed != number_of_requests) {
 
     int wait_time;
     int head_replacement = 0;
-    int circle_time = 0;
-
 
     struct request req;
     int request_to_be_processed_index = -2;
-    if (number_of_processed == number_of_requests) {
-      break;
-    }
-    else if (findNumberArrivedAndUnprocessed(requests,number_of_requests, total_time) == 0) {
+    if (findNumberArrivedAndUnprocessed(requests,number_of_requests, total_time) == 0) {
       /* There is no request in the arrival queue, but processes are not
       finished, so continue to the first arrived one */
       request_to_be_processed_index = findTimeMin(requests,number_of_requests);
-
-      if (request_to_be_processed_index == -1){
-        break;
-      }
       req = requests[request_to_be_processed_index];
-
-    }
-    else {
+    }else {
       /* There is at least one arrived process,
        choose the one which has closes head */
-      circle_time = 0;
-      int old_head = current_head;
-      if (findHeadMin(requests, number_of_requests, current_head) == -1){
-         int ind = findArrivedMinHead(requests, number_of_requests);
-         current_head = requests[ind].disk_number;
-         circle_time += abs(old_head-current_head);
-         request_to_be_processed_index = ind;
-
-      }else{
-        request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head);
+      request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head);
+      if ( request_to_be_processed_index == -1){
+         request_to_be_processed_index = findArrivedMinHead(requests, number_of_requests);
       }
       req = requests[request_to_be_processed_index];
     }
@@ -432,14 +379,10 @@ void clook(struct Queue *req_queue) {
     head_replacement += abs(req.disk_number - current_head);
     current_head = req.disk_number;
 
-    total_time = total_time + head_replacement + circle_time;
+    total_time = total_time + head_replacement;
     total_wait_time += wait_time;
     wait_times[request_to_be_processed_index] = wait_time;
     updateArrivals( requests,  number_of_requests, total_time);
-    if (current_head == findArrivedMaxHead(requests, number_of_requests)) {
-      current_head = findArrivedMinHead(requests, number_of_requests);
-    }
-
 
     requests[request_to_be_processed_index].processed = 1;
     number_of_processed++;
