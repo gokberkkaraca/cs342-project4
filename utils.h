@@ -38,7 +38,10 @@ double calculateSTD(double average, int data[], int size) {
   double square_sum = 0;
   int i;
   for (i = 0; i < size; i++) {
-    double diff = abs(average - data[i]);
+    double diff = average - data[i];
+    if (diff < 0) {
+      diff = -diff;
+    }
     square_sum = square_sum + diff * diff;
   }
   return sqrt(square_sum / (size-1));
