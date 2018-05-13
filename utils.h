@@ -109,3 +109,90 @@ void sort(struct request requests[], int start, int end) {
         sort(requests, index + 1, end);
     }
 }
+
+int findTimeMin( struct request requests[], int size){
+  int index;
+  for( index = 0; index < size; index++){
+    if ( requests[index].processed == 0 && requests[index].arrived == 0) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+
+int findHeadMin( struct request requests[], int size, int current_head, int N){
+  int index;
+  int min_head;
+  int min_head_index;
+
+  min_head = N + 1;
+  min_head_index = -1;
+  for( index = 0; index < size; index++){
+    if( requests[index].processed == 0 && requests[index].arrived == 1){
+      if(requests[index].disk_number <= min_head && requests[index].disk_number > current_head){
+        min_head = requests[index].disk_number;
+        min_head_index = index;
+      }
+    }
+  }
+  return min_head_index;
+}
+
+int findArrivedMinHead( struct request requests[], int size, int N){
+  int index;
+  int min_head;
+  int min_head_index;
+
+  min_head = N + 1;
+  min_head_index = -1;
+  for( index = 0; index < size; index++){
+    if( requests[index].processed == 0 && requests[index].arrived == 1){
+      if(requests[index].disk_number <= min_head){
+        min_head = requests[index].disk_number;
+        min_head_index = index;
+      }
+    }
+  }
+  return min_head_index;
+}
+
+int findHeadMax( struct request requests[], int size, int current_head){
+  int index;
+  int max_head;
+  int max_head_index;
+
+  max_head = -1;
+  max_head_index = -1;
+  for( index = 0; index < size; index++){
+    if( requests[index].processed == 0 && requests[index].arrived == 1){
+      if(requests[index].disk_number >= max_head && requests[index].disk_number < current_head ){
+        max_head = requests[index].disk_number;
+        max_head_index = index;
+      }
+    }
+  }
+  return max_head_index;
+}
+
+
+void updateArrivals(struct request requests[], int size,int current_time, int arrival_index){
+  int i;
+  for (i = arrival_index; i < size; i++) {
+    if(requests[i].arrival_time <= current_time){
+      requests[i].arrived = 1;
+    }
+  }
+}
+
+int findNumberArrivedAndUnprocessed(struct request requests[], int size, int current_time){
+  int i;
+  int count;
+  count = 0;
+  for (i = 0; i < size; i++) {
+    if(requests[i].arrived == 1 && requests[i].processed == 0){
+      count++;
+    }
+  }
+  return count;
+}

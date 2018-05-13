@@ -8,15 +8,8 @@ void fcfs(struct Queue *req_queue);
 void sstf(struct Queue *req_queue);
 void look(struct Queue *req_queue);
 void clook(struct Queue *req_queue);
-int findTimeMin( struct request requests[], int size);
-int findHeadMin( struct request requests[], int size, int current_head);
-int findHeadMax( struct request requests[], int size, int current_head);
-int findArrivedMinHead( struct request requests[], int size);
-void updateArrivals(struct request requests[], int current_time, int size);
-int findNumberArrivedAndUnprocessed();
 
 int N;
-int arrival_index = 0;
 
 int main(int argc, char **argv) {
 
@@ -133,7 +126,7 @@ void sstf(struct Queue *req_queue){
 
 
 void look(struct Queue *req_queue) {
-
+  int arrival_index = 0;
   double total_wait_time = 0;
   double avarage_wait_time;
   double std_wait;
@@ -180,7 +173,7 @@ void look(struct Queue *req_queue) {
       /* There is at least one arrived process,
        choose the one which has closes head */
           if( head_direction == 1){
-            request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head);
+            request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head, N);
             if(request_to_be_processed_index == -1){
               head_direction = 0;
             }
@@ -207,7 +200,7 @@ void look(struct Queue *req_queue) {
     total_time = total_time + head_replacement;
     total_wait_time += wait_time;
     wait_times[request_to_be_processed_index] = wait_time;
-    updateArrivals( requests,  number_of_requests, total_time);
+    updateArrivals(requests,  number_of_requests, total_time, arrival_index);
     requests[request_to_be_processed_index].processed = 1;
     number_of_processed++;
   }
@@ -218,95 +211,8 @@ void look(struct Queue *req_queue) {
   printf("LOOK:\t %d\t%f\t%f\n", total_time, avarage_wait_time, std_wait);
 }
 
-int findTimeMin( struct request requests[], int size){
-  int index;
-  for( index = 0; index < size; index++){
-    if ( requests[index].processed == 0 && requests[index].arrived == 0) {
-      return index;
-    }
-  }
-  return -1;
-}
-
-
-int findHeadMin( struct request requests[], int size, int current_head){
-  int index;
-  int min_head;
-  int min_head_index;
-
-  min_head = N + 1;
-  min_head_index = -1;
-  for( index = 0; index < size; index++){
-    if( requests[index].processed == 0 && requests[index].arrived == 1){
-      if(requests[index].disk_number <= min_head && requests[index].disk_number > current_head){
-        min_head = requests[index].disk_number;
-        min_head_index = index;
-      }
-    }
-  }
-  return min_head_index;
-}
-
-int findArrivedMinHead( struct request requests[], int size){
-  int index;
-  int min_head;
-  int min_head_index;
-
-  min_head = N + 1;
-  min_head_index = -1;
-  for( index = 0; index < size; index++){
-    if( requests[index].processed == 0 && requests[index].arrived == 1){
-      if(requests[index].disk_number <= min_head){
-        min_head = requests[index].disk_number;
-        min_head_index = index;
-      }
-    }
-  }
-  return min_head_index;
-}
-
-int findHeadMax( struct request requests[], int size, int current_head){
-  int index;
-  int max_head;
-  int max_head_index;
-
-  max_head = -1;
-  max_head_index = -1;
-  for( index = 0; index < size; index++){
-    if( requests[index].processed == 0 && requests[index].arrived == 1){
-      if(requests[index].disk_number >= max_head && requests[index].disk_number < current_head ){
-        max_head = requests[index].disk_number;
-        max_head_index = index;
-      }
-    }
-  }
-  return max_head_index;
-}
-
-
-void updateArrivals(struct request requests[], int size,int current_time){
-  int i;
-  for (i = arrival_index; i < size; i++) {
-    if(requests[i].arrival_time <= current_time){
-      requests[i].arrived = 1;
-    }
-  }
-}
-
-int findNumberArrivedAndUnprocessed(struct request requests[], int size, int current_time){
-  int i;
-  int count;
-  count = 0;
-  for (i = 0; i < size; i++) {
-    if(requests[i].arrived == 1 && requests[i].processed == 0){
-      count++;
-    }
-  }
-  return count;
-}
-
 void clook(struct Queue *req_queue) {
-
+  int arrival_index = 0;
   double total_wait_time = 0;
   double avarage_wait_time;
   double std_wait;
@@ -342,9 +248,9 @@ void clook(struct Queue *req_queue) {
     }else {
       /* There is at least one arrived process,
        choose the one which has closes head */
-      request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head);
+      request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head, N);
       if ( request_to_be_processed_index == -1){
-         request_to_be_processed_index = findArrivedMinHead(requests, number_of_requests);
+         request_to_be_processed_index = findArrivedMinHead(requests, number_of_requests, N);
       }
       req = requests[request_to_be_processed_index];
     }
@@ -363,7 +269,7 @@ void clook(struct Queue *req_queue) {
     total_time = total_time + head_replacement;
     total_wait_time += wait_time;
     wait_times[request_to_be_processed_index] = wait_time;
-    updateArrivals( requests,  number_of_requests, total_time);
+    updateArrivals( requests,  number_of_requests, total_time, arrival_index);
 
     requests[request_to_be_processed_index].processed = 1;
     number_of_processed++;
