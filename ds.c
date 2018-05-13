@@ -11,7 +11,6 @@ void clook(struct Queue *req_queue);
 int findTimeMin( struct request requests[], int size);
 int findHeadMin( struct request requests[], int size, int current_head);
 int findHeadMax( struct request requests[], int size, int current_head);
-int findArrivedMaxHead( struct request requests[], int size);
 int findArrivedMinHead( struct request requests[], int size);
 void updateArrivals(struct request requests[], int current_time, int size);
 int findNumberArrivedAndUnprocessed();
@@ -285,24 +284,6 @@ int findHeadMax( struct request requests[], int size, int current_head){
 }
 
 
-int findArrivedMaxHead( struct request requests[], int size){
-  int index;
-  int max_head;
-  int max_head_index;
-
-  max_head = -1;
-  max_head_index = -1;
-  for( index = 0; index < size; index++){
-    if( requests[index].processed == 0 && requests[index].arrived == 1){
-      if(requests[index].disk_number >= max_head){
-        max_head = requests[index].disk_number;
-        max_head_index = index;
-      }
-    }
-  }
-  return max_head_index;
-}
-
 void updateArrivals(struct request requests[], int size,int current_time){
   int i;
   for (i = arrival_index; i < size; i++) {
@@ -392,5 +373,4 @@ void clook(struct Queue *req_queue) {
   std_wait = calculateSTD(avarage_wait_time, wait_times, number_of_requests);
 
   printf("CLOOK:\t %d\t%f\t%f\n", total_time, avarage_wait_time, std_wait);
-
 }
