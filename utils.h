@@ -1,6 +1,55 @@
 #include "math.h"
 #define MAX_FILENAME (128)
 
+int find_first_unarrived_and_unprocessed_look(struct request requests[], int number_of_requests, int head_direction, int current_head, int N) {
+
+
+    // Find the arrival time of next process
+    int next_arrival_time = 99999999;
+    int i;
+    for (i = 0; i < number_of_requests; i++) {
+      if (requests[i].arrived == 0 && requests[i].arrival_time <= next_arrival_time) {
+        next_arrival_time = requests[i].arrival_time;
+      }
+    }
+
+    int selected_index_on_right = -1;
+    int selected_index_on_left = -1;
+    int first_head_on_right = N+1;
+    int first_head_on_left = -1;
+
+    // Find request on right
+    for (i = 0; i < number_of_requests; i++) {
+        // A canditate to be selected
+        if (requests[i].arrival_time == next_arrival_time) {
+          if (requests[i].disk_number >= current_head
+            && requests[i].disk_number <= first_head_on_right) {
+              selected_index_on_right = i;
+              first_head_on_right = requests[i].disk_number;
+          }
+        }
+    }
+
+    // Find request on left
+    for (i = 0; i < number_of_requests; i++) {
+        // A canditate to be selected
+        if (requests[i].arrival_time == next_arrival_time) {
+          if (requests[i].disk_number <= current_head
+            && requests[i].disk_number >= first_head_on_left) {
+              selected_index_on_left = i;
+              first_head_on_left = requests[i].disk_number;
+          }
+        }
+    }
+
+    if ((head_direction == 1 && selected_index_on_right != -1) || (head_direction == 0 && selected_index_on_left == -1)) {
+      return selected_index_on_right;
+    }
+    else {
+      return selected_index_on_left;
+    }
+}
+
 int findMin(int total_time, int current_head, struct request requests[], int size, int N){
   int min_index = -1;
   int min_disp = N + 1;
