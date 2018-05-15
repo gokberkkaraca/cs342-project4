@@ -206,7 +206,7 @@ int findHeadMin( struct request requests[], int size, int current_head, int N){
   min_head_index = -1;
   for( index = 0; index < size; index++){
     if( requests[index].processed == 0 && requests[index].arrived == 1){
-      if(requests[index].disk_number <= min_head && requests[index].disk_number > current_head){
+      if(requests[index].disk_number <= min_head && requests[index].disk_number >= current_head){
         min_head = requests[index].disk_number;
         min_head_index = index;
       }
@@ -242,7 +242,7 @@ int findHeadMax( struct request requests[], int size, int current_head){
   max_head_index = -1;
   for( index = 0; index < size; index++){
     if( requests[index].processed == 0 && requests[index].arrived == 1){
-      if(requests[index].disk_number >= max_head && requests[index].disk_number < current_head ){
+      if(requests[index].disk_number >= max_head && requests[index].disk_number <= current_head ){
         max_head = requests[index].disk_number;
         max_head_index = index;
       }

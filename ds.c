@@ -170,7 +170,7 @@ void look(struct Queue *req_queue) {
     }
     else {
       /* There is at least one arrived process,
-       choose the one which has closes head */
+       choose the one which is closest to head */
         if( head_direction == 1){
           request_to_be_processed_index = findHeadMin(requests, number_of_requests, current_head, N);
           if(request_to_be_processed_index == -1){
@@ -200,7 +200,7 @@ void look(struct Queue *req_queue) {
 
     head_replacement = abs(req.disk_number - current_head);
     current_head = req.disk_number;
-
+    printf("Head: %d\n", current_head);
     total_time = total_time + head_replacement;
     total_wait_time += wait_time;
     wait_times[request_to_be_processed_index] = wait_time;
