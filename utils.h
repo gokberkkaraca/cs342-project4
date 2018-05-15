@@ -8,7 +8,7 @@ int findMin(int total_time, int current_head, struct request requests[], int siz
   int arrived_flag = 0;
 
   for (index = 0; index < size; index++) {
-    if( requests[index].processed == 0 && requests[index].arrival_time <= total_time){
+    if( requests[index].processed == 0 && requests[index].arrival_time < total_time){
       arrived_flag = 1;
       break;
     }
@@ -18,17 +18,16 @@ int findMin(int total_time, int current_head, struct request requests[], int siz
     for( index = 0; index < size; index++){
       if(requests[index].processed == 0){
             min_index = index;
-            min_disp = abs(current_head - requests[index].disk_number);
             break;
       }
   }
   }else{
     for( index = 0; index < size; index++){
-      if( (abs(current_head - requests[index].disk_number) < min_disp) && requests[index].processed == 0 && requests[index].arrival_time <= total_time){
+      if( (abs(current_head - requests[index].disk_number) < min_disp) && requests[index].processed == 0 && requests[index].arrival_time < total_time){
             min_index = index;
             min_disp = abs(current_head - requests[index].disk_number);
+          }
     }
-  }
   }
   requests[min_index].processed = 1;
   return min_index;
@@ -110,16 +109,33 @@ void sort(struct request requests[], int start, int end) {
     }
 }
 
-int findTimeMin( struct request requests[], int size){
+int findTimeMin( struct request requests[], int size, int N){
   int index;
-  for( index = 0; index < size; index++){
+  for( index = 0; index < size - 1; index++){
     if ( requests[index].processed == 0 && requests[index].arrived == 0) {
+      if( requests[index+1].processed == 0 && requests[index+1].arrived == 0 &&
+      requests[index+1].arrival_time == requests[index].arrival_time){
+        int selectedIndex = index;
+        while (requests[index+1].processed == 0 && requests[index+1].arrived == 0 &&
+        requests[index+1].arrival_time == requests[index].arrival_time && index != size - 1 ) {
+          if (requests[index+1].disk_number < requests[index].disk_number) {
+            selectedIndex = index + 1;
+          }
+          index++;
+        }
+        return selectedIndex;
+      }
       return index;
     }
   }
   return -1;
 }
 
+// int findTimeMin(struct request requests[], int size) {
+//   int returned_index;
+//   int i;
+//   while (i != size - 1 && requests[i].arrival_time == request[i+1].arrival_time)
+// }
 
 int findHeadMin( struct request requests[], int size, int current_head, int N){
   int index;
