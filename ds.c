@@ -124,7 +124,6 @@ void sstf(struct Queue *req_queue){
 
   printf("SSTF:\t %d\t%f\t%f\n", total_time, avarage_wait_time, std_wait);
 }
-
 void look(struct Queue *req_queue) {
   int arrival_index = 0;
   double total_wait_time = 0;

@@ -57,22 +57,32 @@ int findMin(int total_time, int current_head, struct request requests[], int siz
   int arrived_flag = 0;
 
   for (index = 0; index < size; index++) {
-    if( requests[index].processed == 0 && requests[index].arrival_time < total_time){
+    if( requests[index].processed == 0 && requests[index].arrival_time <= total_time){
       arrived_flag = 1;
       break;
     }
   }
 
   if(arrived_flag == 0){
+    int min_arrival_time = requests[size-1].arrival_time;
+    int replacement = 0;
     for( index = 0; index < size; index++){
-      if(requests[index].processed == 0){
-            min_index = index;
-            break;
+      if(requests[index].processed == 0 && requests[index].arrival_time <= min_arrival_time){
+        min_index = index;
+        replacement = abs( current_head - requests[min_index].disk_number);
+        while( requests[index].arrival_time == requests[index+1].arrival_time && index < size -1){
+          if( abs(requests[index + 1].disk_number - current_head) < replacement){
+            min_index = index + 1;
+            replacement = abs(requests[index + 1].disk_number - current_head);
+          }
+          index++;
+        }
+        break;
       }
   }
   }else{
     for( index = 0; index < size; index++){
-      if( (abs(current_head - requests[index].disk_number) < min_disp) && requests[index].processed == 0 && requests[index].arrival_time < total_time){
+      if( (abs(current_head - requests[index].disk_number) < min_disp) && requests[index].processed == 0 && requests[index].arrival_time <= total_time){
             min_index = index;
             min_disp = abs(current_head - requests[index].disk_number);
           }
@@ -81,6 +91,7 @@ int findMin(int total_time, int current_head, struct request requests[], int siz
   requests[min_index].processed = 1;
   return min_index;
 }
+
 
 double calculateSTD(double average, int data[], int size) {
   double square_sum = 0;
